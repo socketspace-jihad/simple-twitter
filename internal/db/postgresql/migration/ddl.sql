@@ -1,27 +1,26 @@
--- Jalankan ini di database default (biasanya postgres)
-SELECT 'CREATE DATABASE "simple-twitter"'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'simple-twitter')\gexec
+select 'create database "simple-twitter"'
+where not exists (select from pg_database where datname = 'simple-twitter')\gexec
 
--- Pastikan extension uuid-ossp tersedia untuk generate UUID otomatis jika perlu
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+create extension if not exists "uuid-ossp";
 
-CREATE TABLE users (
-    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    display_name VARCHAR(255) NOT NULL,
-    username     VARCHAR(100) NOT NULL UNIQUE,
-    born_date    DATE,
-    address      TEXT
+create table users (
+    id           uuid primary key default uuid_generate_v4(),
+    display_name varchar(255) not null,
+    username     varchar(100) not null unique,
+    born_date    date,
+    address      text,
+    passwd varchar(20) not null
 );
 
-CREATE TABLE posts (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    content    TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP WITH TIME ZONE,
-    user_id    UUID NOT NULL,
-    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+create table posts (
+    id         uuid primary key default uuid_generate_v4(),
+    content    text not null,
+    created_at timestamp with time zone default current_timestamp,
+    updated_at timestamp with time zone default current_timestamp,
+    deleted_at timestamp with time zone,
+    user_id    uuid not null,
+    constraint fk_user foreign key(user_id) references users(id) on delete cascade
 );
 
-CREATE INDEX idx_posts_user_id ON posts(user_id);
-CREATE INDEX idx_users_username ON users(username);
+create index idx_posts_user_id on posts(user_id);
+create index idx_users_username on users(username);

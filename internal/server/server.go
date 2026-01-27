@@ -114,7 +114,7 @@ func ListPost(w http.ResponseWriter, r *http.Request) {
 	}
 	cookie, err := r.Cookie("token")
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 		return
 	}
 	data := struct {
