@@ -17,4 +17,8 @@ paste it on your psql session
 `go build -o app .`
 
 # How to run the app
+set the env, look at the .env.example env keys
+```
 ./app
+
+```
