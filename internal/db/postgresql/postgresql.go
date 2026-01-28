@@ -3,6 +3,7 @@ package postgresql
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"simple_twitter/internal/models"
 
 	_ "github.com/lib/pq"
@@ -25,6 +26,69 @@ func WithHostname(hostname string) PostgreSQLConfig {
 	}
 }
 
+func WithUser(user string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		ps.User = user
+	}
+}
+
+func WithPasswd(passwd string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		ps.Passwd = passwd
+	}
+}
+
+func WithDatabase(db string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		ps.Database = db
+	}
+}
+
+func WithPort(port string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		ps.Port = port
+	}
+}
+
+func WithHostnameEnv(env string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		if os.Getenv(env) != "" {
+			ps.Hostname = os.Getenv(env)
+		}
+	}
+}
+
+func WithUserEnv(env string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		if os.Getenv(env) != "" {
+			ps.User = os.Getenv(env)
+		}
+	}
+}
+
+func WithPasswdEnv(env string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		if os.Getenv(env) != "" {
+			ps.Passwd = os.Getenv(env)
+		}
+	}
+}
+
+func WithDatabaseEnv(env string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		if os.Getenv(env) != "" {
+			ps.Database = os.Getenv(env)
+		}
+	}
+}
+
+func WithPortEnv(env string) PostgreSQLConfig {
+	return func(ps *PostgreSQL) {
+		if os.Getenv(env) != "" {
+			ps.Port = os.Getenv(env)
+		}
+	}
+}
 func NewPostgreSQL(configs ...PostgreSQLConfig) *PostgreSQL {
 	p := &PostgreSQL{
 		Hostname: "localhost",
@@ -48,7 +112,13 @@ func (p *PostgreSQL) Disconnect() error {
 }
 
 func init() {
-	p := NewPostgreSQL()
+	p := NewPostgreSQL(
+		WithHostnameEnv("DB_HOSTNAME"),
+		WithPortEnv("DB_PORT"),
+		WithUserEnv("DB_USER"),
+		WithPasswdEnv("DB_PASSWORD"),
+		WithDatabaseEnv("DB_DATABASE"),
+	)
 	db, err := sql.Open(
 		"postgres",
 		fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
