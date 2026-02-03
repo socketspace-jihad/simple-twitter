@@ -12,7 +12,7 @@ pipelines:
             - go build
       - step:
           name: Lint code
-          image: golangci/golangci-lint:v1.64.0-alpine
+          image: golangci/golangci-lint:v2-alpine
           script:
             - golangci-lint run -v
 
