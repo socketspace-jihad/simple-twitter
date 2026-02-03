@@ -1,0 +1,18 @@
+image: golang:1.23
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Test and Build
+          script:
+            - mkdir test-reports
+            - go get -u github.com/jstemmer/go-junit-report
+            - go test ./... -v 2>&1 | go-junit-report > test-reports/report.xml
+            - go build
+      - step:
+          name: Lint code
+          image: golangci/golangci-lint:v1.31.0
+          script:
+            - golangci-lint run -v
+
