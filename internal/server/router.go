@@ -1,9 +1,13 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+	"simple_twitter/internal/monitoring"
+)
 
-func StartRouter() *http.ServeMux {
+func StartRouter() http.Handler {
 	mx := http.NewServeMux()
+
 	mx.HandleFunc("/", ListPost)
 	mx.HandleFunc("/user/login", LoginHandler)
 	mx.HandleFunc("/user/logout", LogoutHandler)
@@ -13,5 +17,6 @@ func StartRouter() *http.ServeMux {
 	mx.HandleFunc("/post", DetailPostHandler)
 	mx.HandleFunc("/posts/update", UpdatePostHandler)
 	mx.HandleFunc("/posts/delete/{id}", DeletePostHandler)
-	return mx
+
+	return monitoring.PrometheusMiddleware(mx)
 }
