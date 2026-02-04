@@ -1,3 +1,11 @@
+# Simple Twitter
+### This is an app to "mimic" the twitter behaviour, which are
+- User Authentication
+- Create a tweet
+- Read a tweet
+- Update a tweet
+- Delete a tweet
+
 # Pre-Requisite
 ```
   sudo apt upgrade
