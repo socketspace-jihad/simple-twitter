@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	p := monitoring.NewPrometheus(monitoring.WithPromHTTP())
 	go p.Monitor()
 
