@@ -1,10 +1,14 @@
 package postgresql
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
+	"simple_twitter/internal/logger"
 	"simple_twitter/internal/models"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -98,7 +102,9 @@ func NewPostgreSQL(configs ...PostgreSQLConfig) *PostgreSQL {
 		Port:     "5432",
 	}
 	for _, config := range configs {
-		config(p)
+		if config != nil {
+			config(p)
+		}
 	}
 	return p
 }
@@ -130,6 +136,20 @@ func init() {
 		))
 	if err != nil {
 		panic(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	doneChan := make(chan struct{})
+	go func() {
+		if err := db.PingContext(ctx); err != nil {
+			logger.Logger.Fatal().Err(err).Msg("CRITICAL: Failed to connect to database")
+		}
+		doneChan <- struct{}{}
+	}()
+	select {
+	case <-ctx.Done():
+		logger.Logger.Fatal().Err(errors.New("CRITICAL: Database connection timeout!")).Msg("CRITICAL: cannot connect to database")
+	case <-doneChan:
+		logger.Logger.Info().Msg("Connected to database")
 	}
 	p.DB = db
 	models.SetUserDB(p)
