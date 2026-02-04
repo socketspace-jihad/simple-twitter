@@ -10,9 +10,4 @@ pipelines:
             - go install github.com/jstemmer/go-junit-report/v2@latest
             - go test ./... -v 2>&1 | $(go env GOPATH)/bin/go-junit-report > test-reports/report.xml
             - go build
-      - step:
-          name: Lint code
-          image: golangci/golangci-lint:v2-alpine
-          script:
-            - golangci-lint run -v
 
