@@ -6,12 +6,17 @@ This is a minimalist social ecosystem that focuses on the core of digital intera
 - Update a tweet
 - Delete a tweet
 
-# Pre-Requisite
+# Tech Stack
+- Go Programming Language
+- PostgreSQL
+
+# Installation
+## Pre-Requisite
 ```
   sudo apt upgrade
   sudo apt install git golang-go postgresql
 ```
-# Setup postgresql
+## Setup postgresql
 ```
   sudo su
   sudo -u postgres psql postgres
@@ -21,10 +26,10 @@ dont close the psql terminal yet
 copy the value from internal/db/postgresql/migration/ddl.sql
 paste it on your psql session
 
-# How to Build the app
+## Build the app
 `go build -o app .`
 
-# How to run the app
+## Run the app
 set the env, look at the .env.example env keys
 ```
 ./app
