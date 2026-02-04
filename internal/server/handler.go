@@ -107,14 +107,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListPost(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("token")
+	if err != nil || cookie.Value == "" {
+		http.Redirect(w, r, "/user/login", http.StatusTemporaryRedirect)
+		return
+	}
 	posts, err := models.ListPost()
 	if err != nil {
 		w.Write([]byte(err.Error()))
-		return
-	}
-	cookie, err := r.Cookie("token")
-	if err != nil {
-		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 		return
 	}
 	data := struct {
