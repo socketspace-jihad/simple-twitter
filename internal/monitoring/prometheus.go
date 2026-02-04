@@ -31,10 +31,10 @@ func WithPromHTTP() PrometheusConfig {
 
 func (p *Prometheus) Monitor() {
 	srv := &http.Server{
-		Addr:    ":9090",
+		Addr:    ":9091",
 		Handler: p.mx,
 	}
-	log.Println("prometheus metrics is listening on port 9090 ...")
+	log.Println("prometheus metrics is listening on port 9091...")
 	if err := srv.ListenAndServe(); err != nil {
 		log.Println(err.Error())
 	}
