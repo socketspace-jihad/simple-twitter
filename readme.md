@@ -1,5 +1,6 @@
 # Simple Twitter
 This is a minimalist social ecosystem that focuses on the core of digital interaction: the message. Designed for speed and simplicity, it allows users to broadcast thoughts, engage with a global feed, and maintain full control over their digital presence through a robust CRUD-based architecture.
+
 - User Authentication
 - Create a tweet
 - Read a tweet
