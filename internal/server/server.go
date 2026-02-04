@@ -1,18 +1,34 @@
 package server
 
 import (
-	"log"
 	"net/http"
+	"os"
+	"simple_twitter/internal/logger"
 )
 
-func NewHTTPServer() *http.Server {
+type HTTPConfig func(*http.Server)
+
+func WithHostEnv() HTTPConfig {
+	return func(s *http.Server) {
+		val := os.Getenv("APP_HOST")
+		if val != "" {
+			s.Addr = val
+		}
+	}
+}
+
+func NewHTTPServer(configs ...HTTPConfig) *http.Server {
 	router := StartRouter()
 
-	addr := &http.Server{
+	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
 	}
-	log.Println("http server is listening on port 8080..")
-
-	return addr
+	for _, config := range configs {
+		if config != nil {
+			config(srv)
+		}
+	}
+	logger.Logger.Info().Str("addr", srv.Addr).Msg("http server is listening")
+	return srv
 }

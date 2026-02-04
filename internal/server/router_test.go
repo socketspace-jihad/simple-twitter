@@ -42,5 +42,21 @@ func Test_Route(t *testing.T) {
 			return
 		}
 
+		t.Run("GET /user/register", func(t *testing.T) {
+			rr := httptest.NewRecorder()
+
+			req, err := http.NewRequest("GET", "/user/register", nil)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			router.ServeHTTP(rr, req)
+			if status := rr.Code; status != http.StatusOK {
+				t.Error(errors.New("wrong response status code"))
+				return
+			}
+		})
+
 	})
 }

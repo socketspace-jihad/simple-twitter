@@ -2,11 +2,11 @@ package server
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"simple_twitter/internal/models"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,6 +14,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		tmpl, err := template.ParseFiles("templates/register.html")
 		if err != nil {
+			log.Err(err)
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -29,6 +30,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 			models.WithDisplayName(displayname),
 		)
 		if err := user.Save(); err != nil {
+			log.Err(err)
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -54,6 +56,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if err := user.Login(); err != nil {
+			log.Err(err)
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -84,6 +87,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("token")
 
 	if err != nil {
+		log.Err(err)
 		if err == http.ErrNoCookie {
 			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 			return
@@ -100,6 +104,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	if err := post.Save(); err != nil {
+		log.Err(err)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -109,11 +114,13 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 func ListPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("token")
 	if err != nil || cookie.Value == "" {
+		log.Err(err)
 		http.Redirect(w, r, "/user/login", http.StatusTemporaryRedirect)
 		return
 	}
 	posts, err := models.ListPost()
 	if err != nil {
+		log.Err(err)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -126,6 +133,7 @@ func ListPost(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
+		log.Err(err)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -142,7 +150,7 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 		ID: uuid.MustParse(postID),
 	}
 	if err := p.Delete(); err != nil {
-		log.Println(err.Error())
+		log.Err(err)
 		w.Write([]byte(err.Error()))
 		return
 	}
