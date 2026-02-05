@@ -46,11 +46,10 @@ func BodyLogger(next http.Handler) http.Handler {
 func StartRouter() http.Handler {
 	mx := http.NewServeMux()
 
-	mx.HandleFunc("/", ListPost)
+	mx.HandleFunc("GET /home", ListPost)
 	mx.HandleFunc("GET /user/login", LoginHandler)
 	mx.Handle("POST /user/login", BodyLogger(http.HandlerFunc(LoginHandler)))
 
-	mx.HandleFunc("GET /user/logout", LoginHandler)
 	mx.Handle("POST /user/logout", BodyLogger(http.HandlerFunc(LogoutHandler)))
 
 	mx.HandleFunc("GET /user/register", CreateUserHandler)

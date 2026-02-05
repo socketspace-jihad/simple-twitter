@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"simple_twitter/internal/models"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -52,7 +53,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 		user := models.NewUser(
 			models.WithUsername(username),
-			models.WithPassword(password),
 		)
 
 		if err := user.Login(); err != nil {
@@ -69,17 +69,29 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				HttpOnly: true,
 				MaxAge:   3600,
 			})
+			log.Debug().Msg("redirecting to dashboard page")
 
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		}
 
-		data := map[string]string{"Error": "Username atau password salah!"}
-		tmpl, _ := template.ParseFiles("templates/login.html")
-		tmpl.Execute(w, data)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 	}
 }
-func LogoutHandler(w http.ResponseWriter, r *http.Request)  {}
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Path:     "/",
+		Value:    "",
+		HttpOnly: true,
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
+	})
+	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+}
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {}
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +120,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
 
 func ListPost(w http.ResponseWriter, r *http.Request) {
@@ -154,5 +166,5 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }

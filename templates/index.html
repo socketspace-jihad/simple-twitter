@@ -15,6 +15,11 @@
             <button @click="openModal = true" class="hidden sm:block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition">
                 Tweet
             </button>
+            <form action="/user/logout" method="POST">
+              <button type="submit" class="hidden sm:block bg-blue-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full transition">
+                Logout 
+              </button>
+            </form>
         </div>
 
         <div class="space-y-4">
@@ -108,4 +113,10 @@
     </div>
 
 </body>
+  <script>
+    function onLogout(){
+      deleteCookie('token','/')
+      window.location.replace("/user/login")
+    }
+  </script>
 </html>
