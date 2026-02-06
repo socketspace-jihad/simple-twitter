@@ -2,6 +2,8 @@ package postgresql
 
 import (
 	"simple_twitter/internal/models"
+
+	"github.com/rs/zerolog/log"
 )
 
 func (p *PostgreSQL) SavePost(post *models.Post) error {
@@ -22,6 +24,20 @@ func (p *PostgreSQL) SavePost(post *models.Post) error {
 }
 
 func (p *PostgreSQL) UpdatePost(post *models.Post) error {
+	tx, err := p.DB.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	log.Debug().Str("id", post.ID.String()).Str("content", post.Content).Msg("debug body")
+	if _, err := tx.Exec("UPDATE posts SET content = $1 WHERE id = $2", post.Content, post.ID); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return err
+	}
 	return nil
 }
 

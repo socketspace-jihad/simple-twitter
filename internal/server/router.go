@@ -58,7 +58,8 @@ func StartRouter() http.Handler {
 	mx.Handle("POST /posts/create", BodyLogger(http.HandlerFunc(CreatePostHandler)))
 
 	mx.HandleFunc("/post", DetailPostHandler)
-	mx.HandleFunc("/posts/update", UpdatePostHandler)
+	mx.Handle("/posts/update", BodyLogger(http.HandlerFunc(UpdatePostHandler)))
+	mx.Handle("/posts/delete/{id}", BodyLogger(http.HandlerFunc(DeletePostHandler)))
 	var chain http.Handler = mx
 
 	chain = hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {

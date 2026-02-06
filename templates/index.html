@@ -7,7 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-100" x-data="{ openModal: false }">
+<body class="bg-gray-100" x-data="{ 
+    openModal: false,
+    openModalEdit: false,
+    editContent: '',
+    editId: ''
+    }">
 
     <div class="max-w-2xl mx-auto py-8 mb-20">
         <div class="flex justify-between items-center mb-6 px-4">
@@ -44,6 +49,7 @@
                                     </svg>
                                 </button>
 
+
                                 <div x-show="menuOpen" 
                                      x-cloak
                                      @click.away="menuOpen = false" 
@@ -51,7 +57,8 @@
                                      x-transition:enter-start="transform opacity-0 scale-95"
                                      x-transition:enter-end="transform opacity-100 scale-100"
                                      class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-xl border border-gray-100 py-1 z-10">
-                                    <form action="/posts/delete/{{.ID}}" method="POST" onsubmit="return confirm('Hapus postingan ini?')">
+                    <button @click="openModalEdit = true; editContent = `{{.Content}}`; editId = `{{.ID.String}}`" class="block w-full px-4 py-2 text-sm text-black-600 hover:bg-yellow-50 text-left">Ubah</button>
+                                    <form action="/posts/delete/{{.ID.String}}" method="DELETE">
                                         <button type="submit" class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left">Hapus</button>
                                     </form>
                                 </div>
@@ -69,6 +76,38 @@
                     </div>
                 </div>
             </div>
+        <div x-show="openModalEdit" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        
+        <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="openModalEdit = false"></div>
+
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="/posts/update" method="POST">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <button type="button" @click="openModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-1.5 rounded-full font-bold text-sm hover:bg-blue-600">Tweet</button>
+                        </div>
+                        <div class="flex space-x-3">
+                            <div class="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
+                            <textarea name="id" style="display:none;" required x-model="editId" class="w-full border-none focus:ring-0 text-lg placeholder-gray-500 resize-none"
+></textarea>
+                            <textarea name="content" rows="4" required x-model="editContent"
+                                class="w-full border-none focus:ring-0 text-lg placeholder-gray-500 resize-none"
+                                placeholder="Apa yang sedang hangat?"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
             {{else}}
             <div class="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300">
                 <p class="text-gray-500">Belum ada postingan. Jadilah yang pertama!</p>
@@ -113,10 +152,4 @@
     </div>
 
 </body>
-  <script>
-    function onLogout(){
-      deleteCookie('token','/')
-      window.location.replace("/user/login")
-    }
-  </script>
 </html>

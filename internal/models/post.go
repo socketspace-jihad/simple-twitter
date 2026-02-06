@@ -43,7 +43,7 @@ func (p *Post) Save() error {
 }
 
 func (p *Post) Update() error {
-	return nil
+	return postDB.UpdatePost(p)
 }
 
 func (p *Post) Delete() error {

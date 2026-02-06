@@ -154,7 +154,23 @@ func ListPost(w http.ResponseWriter, r *http.Request) {
 
 func DetailPostHandler(w http.ResponseWriter, r *http.Request) {}
 
-func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {}
+func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
+	log.Debug().Str("id", r.FormValue("id")).Msg("checking for ID")
+	uid, err := uuid.Parse(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	p := models.Post{
+		ID:      uid,
+		Content: r.FormValue("content"),
+	}
+	if err := p.Update(); err != nil {
+		log.Err(err)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+}
 
 func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
