@@ -37,7 +37,7 @@ func Test_Route(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusTemporaryRedirect {
+		if status := rr.Code; status != http.StatusNotFound {
 			t.Error(errors.New("wrong response status code"))
 			return
 		}
