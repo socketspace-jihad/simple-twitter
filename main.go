@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"simple_twitter/internal/cache"
 	_ "simple_twitter/internal/cache/redis_st"
 	_ "simple_twitter/internal/db/postgresql"
@@ -16,7 +17,7 @@ func main() {
 	)
 	go p.Monitor()
 
-	cacheEngine, err := cache.UseCache("redis")
+	cacheEngine, err := cache.UseCache(os.Getenv("CACHE_ENGINE"))
 	if err != nil {
 		panic(err)
 	}
