@@ -10,8 +10,10 @@ This is a minimalist social ecosystem that focuses on the core of digital intera
 # Tech Stack
 - Go Programming Language
 - PostgreSQL
+- Redis
+- NATS
 
-# Installation
+# Database Installation
 ## Pre-Requisite
 ```
   sudo apt upgrade

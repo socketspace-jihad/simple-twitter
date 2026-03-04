@@ -1,9 +1,11 @@
 package server
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"simple_twitter/internal/models"
+	"simple_twitter/internal/nats_st"
 	"time"
 
 	"github.com/google/uuid"
@@ -35,6 +37,18 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
+		go func() {
+			msg := models.Mail{
+				To:      "abbdurahmanj@gmail.com",
+				Subj:    "test",
+				Content: "this is test email",
+			}
+			data, err := json.Marshal(msg)
+			if err != nil {
+				log.Err(err)
+			}
+			nats_st.NATSServer.Publish("mail_sender", data)
+		}()
 		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 	}
 }
