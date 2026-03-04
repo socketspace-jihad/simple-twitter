@@ -3,6 +3,7 @@ package redis_st
 import (
 	"context"
 	"log"
+	"os"
 	"simple_twitter/internal/cache"
 	"time"
 
@@ -19,9 +20,11 @@ type Redis struct {
 
 type RedisConfig func(*Redis)
 
-func WithAddr(addr string) RedisConfig {
+func WithAddrEnv(env string) RedisConfig {
 	return func(r *Redis) {
-		r.Addr = addr
+		if val := os.Getenv(env); val != "" {
+			r.Addr = val
+		}
 	}
 }
 
@@ -37,12 +40,15 @@ func WithUser(user string) RedisConfig {
 	}
 }
 
-func NewRedis() cache.Cache {
+func NewRedis(configs ...RedisConfig) cache.Cache {
 	rd := &Redis{
 		Addr:   "127.0.0.1:6379",
 		User:   "default",
 		Passwd: "",
 		ctx:    context.Background(),
+	}
+	for _, config := range configs {
+		config(rd)
 	}
 	return rd
 }
@@ -100,5 +106,8 @@ func (r *Redis) Delete(key string) {
 }
 
 func init() {
-	cache.RegisterCache("redis", NewRedis())
+	rd := NewRedis(
+		WithAddrEnv("REDIS_URL"),
+	)
+	cache.RegisterCache("redis", rd)
 }
