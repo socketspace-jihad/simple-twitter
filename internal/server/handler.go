@@ -2,10 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
+	"net/mail"
 	"simple_twitter/internal/models"
 	"simple_twitter/internal/nats_st"
+	"simple_twitter/internal/storage"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,6 +30,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		displayname := r.FormValue("display_name")
 		pass := r.FormValue("password")
+		email := r.FormValue("email")
+		if _, err := mail.ParseAddress(email); err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 		user := models.NewUser(
 			models.WithPassword(pass),
 			models.WithUsername(username),
@@ -39,9 +47,9 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		go func() {
 			msg := models.Mail{
-				To:      "abbdurahmanj@gmail.com",
-				Subj:    "test",
-				Content: "this is test email",
+				To:      email,
+				Subj:    "Simple Twitter Account Creation",
+				Content: "You're account has been created",
 			}
 			data, err := json.Marshal(msg)
 			if err != nil {
@@ -109,26 +117,70 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {}
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	content := r.FormValue("content")
 	cookie, err := r.Cookie("token")
-
 	if err != nil {
 		log.Err(err)
 		if err == http.ErrNoCookie {
 			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 			return
 		}
-
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
+
+	// Parse multipart form (max 10MB in memory, rest goes to temp files)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		log.Err(err).Msg("failed to parse multipart form")
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	content := r.FormValue("content")
 	tokenValue := cookie.Value
+
 	post := &models.Post{
 		Content: content,
 		User: models.User{
 			ID: uuid.MustParse(tokenValue),
 		},
 	}
+
+	// Handle optional image upload
+	file, header, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+
+		ct := header.Header.Get("Content-Type")
+		if !storage.IsImageContentType(ct) {
+			http.Error(w, "Only image files (JPEG, PNG, GIF, WebP) are allowed", http.StatusBadRequest)
+			return
+		}
+
+		if storage.S3Client == nil {
+			http.Error(w, "Image upload is not configured", http.StatusServiceUnavailable)
+			return
+		}
+
+		// Compress image to max 2MB
+		compressed, finalCT, err := storage.CompressImage(file, ct)
+		if err != nil {
+			log.Err(err).Msg("failed to compress image")
+			http.Error(w, "Failed to process image", http.StatusInternalServerError)
+			return
+		}
+
+		// Upload to S3
+		key := fmt.Sprintf("tweets/%s/%d_%s", tokenValue, time.Now().UnixMilli(), header.Filename)
+		imageURL, err := storage.S3Client.Upload(compressed, key, finalCT)
+		if err != nil {
+			log.Err(err).Msg("failed to upload image to S3")
+			http.Error(w, "Failed to upload image", http.StatusInternalServerError)
+			return
+		}
+
+		post.ImageURL = imageURL
+	}
+
 	if err := post.Save(); err != nil {
 		log.Err(err)
 		w.Write([]byte(err.Error()))

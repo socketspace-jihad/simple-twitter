@@ -55,7 +55,7 @@ func StartRouter() http.Handler {
 	mx.HandleFunc("GET /user/register", CreateUserHandler)
 	mx.Handle("POST /user/register", BodyLogger(http.HandlerFunc(CreateUserHandler)))
 
-	mx.Handle("POST /posts/create", BodyLogger(http.HandlerFunc(CreatePostHandler)))
+	mx.HandleFunc("POST /posts/create", CreatePostHandler)
 
 	mx.HandleFunc("/post", DetailPostHandler)
 	mx.Handle("/posts/update", BodyLogger(http.HandlerFunc(UpdatePostHandler)))

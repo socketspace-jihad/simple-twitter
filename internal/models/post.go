@@ -25,6 +25,7 @@ type PostDB interface {
 type Post struct {
 	ID        uuid.UUID `json:"id"`
 	Content   string    `json:"content"`
+	ImageURL  string    `json:"image_url"`
 	CreatedAt time.Time `json:"created_at"`
 	DeletedAt time.Time `json:"deleted_at"`
 	UpdatedAt time.Time `json:"updated_at"`

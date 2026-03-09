@@ -8,6 +8,7 @@ import (
 	"simple_twitter/internal/logger"
 	"simple_twitter/internal/monitoring"
 	_ "simple_twitter/internal/nats_st"
+	_ "simple_twitter/internal/storage"
 	"simple_twitter/internal/server"
 	"simple_twitter/internal/worker"
 	_ "simple_twitter/internal/worker/mail_sender"
